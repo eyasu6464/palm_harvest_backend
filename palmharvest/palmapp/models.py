@@ -14,8 +14,8 @@ class Branch(models.Model):
     address_longitude = models.CharField(max_length=50)
     address_latitude = models.CharField(max_length=50)
 
-class User(models.Model):
-    user = models.OneToOneField(AuthUser, on_delete=models.CASCADE, primary_key=True)
+class PalmUser(models.Model):
+    palmuser = models.OneToOneField(AuthUser, on_delete=models.CASCADE, primary_key=True)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=20, 
                                  choices=UserType.choices, 
@@ -27,6 +27,7 @@ class User(models.Model):
 class Image(models.Model):
     imageid = models.AutoField(primary_key=True)
     harvesterid = models.ForeignKey(AuthUser, on_delete=models.CASCADE)
+    imagepath = models.FileField(upload_to='uploads/')
     image_created = models.DateTimeField()
     image_uploaded = models.DateTimeField()
     

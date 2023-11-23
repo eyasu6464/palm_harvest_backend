@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .serializer import *
 from django.contrib.auth.hashers import make_password
 from rest_framework.permissions import IsAuthenticated
+from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.utils import timezone
@@ -21,8 +22,8 @@ def register(request):
             email = request.data.get('email'),
             password = make_password(request.data.get('password'))
         )
-        users = User.objects.create(
-            user = authuser,
+        users = PalmUser.objects.create(
+            palmuser = authuser,
             user_type = request.data.get('user_type'),
             address = request.data.get('address'),
             branch_id = request.data.get('branch_id'),
@@ -38,6 +39,31 @@ def register(request):
             'Message':'User already exists'
         })
         
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def registerBranch(request):
+    data = request.data
+    serializer = BranchSerializer(data=data)
+    if(serializer.is_valid()):
+        serializer.save()
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def uploadImage(request):
+    image_obj = request.data.get("image")
+    if not image_obj:
+        return Response({"error":"Image is Required"}, status=status.HTTP_400_BAD_REQUEST)
+    image_instance = Image.objects.create(
+        harvesterid = request.user,
+        imagepath=image_obj,
+        image_created = datetime.now(),
+        image_uploaded = datetime.now())
+    image_instance.save()
+    serializer = ImageSerializer(image_instance)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -49,8 +75,8 @@ def allBranches(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allUsers(request):
-    user = User.objects.all()    
-    serializer = UserSerializer(user, many=True)
+    user = PalmUser.objects.all()    
+    serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])

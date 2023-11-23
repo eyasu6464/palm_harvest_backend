@@ -6,4 +6,6 @@ urlpatterns = [
     path('branches/', views.allBranches, name="get_all_branches"),
     path('users/', views.allUsers, name="get_all_branches"),
     path('images/', views.allimages, name="get_all_branches"),
+    path('registerbranch/', views.registerBranch, name='register_branch'),
+    path('uploadimage/', views.uploadImage, name="Upload_image")
 ]
