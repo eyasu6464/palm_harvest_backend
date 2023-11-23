@@ -8,7 +8,7 @@ class UserType(models.TextChoices):
     Harvester = 'Harvester'
 
 class Branch(models.Model):
-    branchid = models.IntegerField(primary_key=True)
+    branchid = models.AutoField(primary_key=True)
     branchname = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
     address_longitude = models.CharField(max_length=50)
@@ -16,7 +16,7 @@ class Branch(models.Model):
 
 class User(models.Model):
     user = models.OneToOneField(AuthUser, on_delete=models.CASCADE, primary_key=True)
-    branchid = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=20, 
                                  choices=UserType.choices, 
                                  default=UserType.Harvester)
@@ -31,7 +31,7 @@ class Image(models.Model):
     image_uploaded = models.DateTimeField()
     
 class PalmDetail(models.Model):
-    palmid = models.IntegerField(primary_key=True)
+    palmid = models.AutoField(primary_key=True)
     quality = models.CharField(max_length=50)
     imageid = models.ForeignKey(Image, on_delete=models.CASCADE)
     real = models.CharField(max_length=50)
