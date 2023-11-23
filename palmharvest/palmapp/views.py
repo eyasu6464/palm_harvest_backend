@@ -4,6 +4,7 @@ from django.contrib.auth.models import User as AuthUser
 from rest_framework.response import Response
 from .serializer import *
 from django.contrib.auth.hashers import make_password
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.utils import timezone
@@ -39,18 +40,21 @@ def register(request):
         
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def allBranches(request):
     branch = Branch.objects.all()    
     serializer = BranchSerializer(branch, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def allUsers(request):
     user = User.objects.all()    
     serializer = UserSerializer(user, many=True)
     return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def allimages(request):
     image = Image.objects.all()    
     serializer = ImageSerializer(image, many=True)
