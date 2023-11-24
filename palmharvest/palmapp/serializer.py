@@ -16,7 +16,7 @@ class PalmUserSerializer(serializers.ModelSerializer):
     palmuser = AuthUserSerializer()
     class Meta:
         model = PalmUser
-        fields = ('palmuser', 'branch', 'user_type', 'address', 'status')
+        fields = ('palmuser', 'branch', 'user_type', 'address')
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:

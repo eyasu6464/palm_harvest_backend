@@ -7,5 +7,6 @@ urlpatterns = [
     path('users/', views.allUsers, name="get_all_branches"),
     path('images/', views.allimages, name="get_all_branches"),
     path('registerbranch/', views.registerBranch, name='register_branch'),
-    path('uploadimage/', views.uploadImage, name="Upload_image")
+    path('uploadimage/', views.uploadImage, name="Upload_image"),
+    path('userinformation/', views.userInfo, name="user_information")
 ]

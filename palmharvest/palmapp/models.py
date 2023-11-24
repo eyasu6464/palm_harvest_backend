@@ -20,9 +20,7 @@ class PalmUser(models.Model):
     user_type = models.CharField(max_length=20, 
                                  choices=UserType.choices, 
                                  default=UserType.Harvester)
-    address = models.CharField(max_length=50)
-    status = models.CharField(max_length=50)
-    
+    address = models.CharField(max_length=50)    
 
 class Image(models.Model):
     imageid = models.AutoField(primary_key=True)

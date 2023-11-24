@@ -26,8 +26,7 @@ def register(request):
             palmuser = authuser,
             user_type = request.data.get('user_type'),
             address = request.data.get('address'),
-            branch_id = request.data.get('branch_id'),
-            status = "Activated"
+            branch_id = request.data.get('branch_id')
         )
         return Response({
                 'Message':'User Registered'
@@ -49,6 +48,7 @@ def registerBranch(request):
         return Response(serializer.data, status=201)
     return Response(serializer.errors, status=400)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def uploadImage(request):
@@ -64,6 +64,12 @@ def uploadImage(request):
     serializer = ImageSerializer(image_instance)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def userInfo(request):
+    palmuser = PalmUser.objects.get(palmuser = request.user)
+    serializer = PalmUserSerializer(palmuser)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
