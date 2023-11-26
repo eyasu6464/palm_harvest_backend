@@ -80,6 +80,13 @@ def allBranches(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def getbranch(request,pk):
+    branch = get_object_or_404(Branch, branchid=pk)
+    serializer = BranchSerializer(branch, many=False)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def allUsers(request):
     user = PalmUser.objects.all()    
     serializer = PalmUserSerializer(user, many=True)
