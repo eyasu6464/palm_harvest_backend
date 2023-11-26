@@ -13,10 +13,11 @@ Techstack: Django
 | GET | `api/users` | get all users info |
 | GET | `api/branches` | get all branches |
 | GET | `api/userinformation` | get current user information |
+| GET | `api/getbranch/id` | get specific branch by id |
 
 ##### All API need Bearer Token except register 
 
-#### API Descriptions
+#### POST API Descriptions
 1. `api/token`
    ```JSON
    {
@@ -25,8 +26,16 @@ Techstack: Django
    }
   
    ```
+   Response: access and refresh tokens
 
-2. `api/registeruser`
+   ```JSON
+   {
+    "refresh": "REFRESH KEY TOKEN",
+    "access": "Access KEY TOKEN"
+   }
+   ```
+
+3. `api/registeruser`
    ```JSON
    {
     "first_name":"First name",
@@ -38,7 +47,8 @@ Techstack: Django
     "branch_id":"ID"
    }
    ```
-3. `api/registerbranch`
+   Response: Approval Message
+4. `api/registerbranch`
 
    ```JSON
    {
@@ -48,9 +58,73 @@ Techstack: Django
     "address_latitude":"Latitude value"
    }
    ```
+   Response: Approval Message
 
-4. `api/uploadimage`
+5. `api/uploadimage`
    ```JSON
    form data with key name image
+   ```
+   Response: Approval Message
 
+#### GET API Descriptions
+1. `api/users`
+   Response: Array of users
+   ```JSON
+   [
+    {
+        "palmuser": {
+            "id": id,
+            "username": "username",
+            "email": "email",
+            "first_name": "First Name",
+            "last_name": "Last Name"
+        },
+        "branch":  branch ID,
+        "user_type": "USER_TYPE",
+        "address": "Address of User"
+    }
+   ]
+   ```
+
+
+2. `api/branches`
+   Response: Array of Branches
+   ```JSON
+   [
+    {
+        "branchid": branch ID,
+        "branchname": "Branch Name",
+        "city": "Branch Ciry",
+        "address_longitude": "Longitude Address",
+        "address_latitude": "Latitude Address"
+    }
+   ]
+   ```
+
+3. `api/userinformation`
+   Response: Current user information
+   ```JSON
+   {
+        "palmuser": {
+            "id": id,
+            "username": "username",
+            "email": "email",
+            "first_name": "First Name",
+            "last_name": "Last Name"
+        },
+        "branch":  branch ID,
+        "user_type": "USER_TYPE",
+        "address": "Address of User"
+    }
+   ```
+5. `api/getbranch/id`
+   Response: Branch Information with Specific ID
+   ```JSON
+   {
+        "branchid": branch ID,
+        "branchname": "Branch Name",
+        "city": "Branch Ciry",
+        "address_longitude": "Longitude Address",
+        "address_latitude": "Latitude Address"
+    }
    ```
