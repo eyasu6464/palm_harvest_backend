@@ -12,6 +12,7 @@ Techstack: Django
 | POST | `api/uploadimage` | used to upload images by Harvesters |
 | GET | `api/users` | get all users info |
 | GET | `api/branches` | get all branches |
+| GET | `api/userinformation` | get current user information |
 
 ##### All API need Bearer Token except register 
 
