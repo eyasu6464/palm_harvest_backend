@@ -9,5 +9,6 @@ urlpatterns = [
     path('registerbranch/', views.registerBranch, name='register_branch'),
     path('uploadimage/', views.uploadImage, name="Upload_image"),
     path('userinformation/', views.userInfo, name="user_information"),
-    path('getbranch/<str:pk>/', views.getbranch, name='get_one_branch_by_id')
+    path('getbranch/<str:pk>/', views.getbranch, name='get_one_branch_by_id'),
+    path('allbranchnames/', views.allBranchNames, name='all_branch_names_list')
 ]

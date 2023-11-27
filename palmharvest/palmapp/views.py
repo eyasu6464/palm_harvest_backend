@@ -36,7 +36,8 @@ def register(request):
     else:
         return Response({
             'Message':'User already exists'
-        })
+        },
+        status=status.HTTP_400_BAD_REQUEST)
         
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -98,3 +99,9 @@ def allimages(request):
     image = Image.objects.all()    
     serializer = ImageSerializer(image, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def allBranchNames(request):
+    branches = Branch.objects.all()
+    data = [{'id': branch.branchid, 'name': branch.branchname} for branch in branches]
+    return Response(data, status=status.HTTP_200_OK)
