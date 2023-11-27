@@ -20,7 +20,8 @@ def register(request):
             last_name = request.data.get('last_name'),
             username = request.data.get('email'),
             email = request.data.get('email'),
-            password = make_password(request.data.get('password'))
+            password = make_password(request.data.get('password')),
+            is_active=False
         )
         users = PalmUser.objects.create(
             palmuser = authuser,
@@ -89,7 +90,7 @@ def getbranch(request,pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allUsers(request):
-    user = PalmUser.objects.all()    
+    user = PalmUser.objects.filter(palmuser__is_active = True)    
     serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
 
@@ -105,3 +106,46 @@ def allBranchNames(request):
     branches = Branch.objects.all()
     data = [{'id': branch.branchid, 'name': branch.branchname} for branch in branches]
     return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def inactiveUsers(request):
+    inactive_users = AuthUser.objects.filter(is_active=False)
+    
+    user_data = []
+    for user in inactive_users:
+        user_info = {
+            'userid': user.id,
+            'username': user.username,
+            'firstname': user.first_name,
+            'lastname': user.last_name
+        }
+        user_data.append(user_info)
+    
+    return Response(user_data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def activateAccount(request, id):
+    try:
+        user = AuthUser.objects.get(id=id)
+    except AuthUser.DoesNotExist:
+        return Response({'Message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    user.is_active = True
+    user.save()
+
+    return Response({'Message': 'User account activated successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def deactivateAccount(request, id):
+    try:
+        user = AuthUser.objects.get(id=id)
+    except AuthUser.DoesNotExist:
+        return Response({'Message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    user.is_active = False
+    user.save()
+
+    return Response({'Message': 'User account deactivated successfully'}, status=status.HTTP_200_OK)

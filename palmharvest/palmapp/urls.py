@@ -10,5 +10,8 @@ urlpatterns = [
     path('uploadimage/', views.uploadImage, name="Upload_image"),
     path('userinformation/', views.userInfo, name="user_information"),
     path('getbranch/<str:pk>/', views.getbranch, name='get_one_branch_by_id'),
-    path('allbranchnames/', views.allBranchNames, name='all_branch_names_list')
+    path('allbranchnames/', views.allBranchNames, name='all_branch_names_list'),
+    path('inactiveusers/', views.inactiveUsers, name='list_of_inactive_users'),
+    path('activateaccount/<int:id>/', views.activateAccount, name='activate-account'),
+    path('deactivateaccount/<int:id>/', views.deactivateAccount, name='deactivate-account'),
 ]
