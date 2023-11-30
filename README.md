@@ -16,6 +16,8 @@ Techstack: Django
 | GET | `api/getbranch/id` | get specific branch by id |
 | GET | `api/activateaccount/id/` | activate user account by id |
 | GET | `api/deactivateaccount/id/` | deactivate user account by id |
+| PUT | `updatebranch/id/` | update branch informaiton |
+| DELETE | `deletebranch/id/` | delete branch |
 
 ##### All API need Bearer Token except register 
 
@@ -132,6 +134,25 @@ Techstack: Django
     }
    ```
 6. `api/activateaccount/id/`
-   Response: Messsage
+   Response: Approval Messsage
 7. `api/activateaccount/id/`
-   Response: Messsage
+   Response: Approval Messsage
+
+#### PUT API Descriptions
+
+1. `updatebranch/id/`
+
+   ```JSON
+   {
+    "branchname":"Branch name here",
+    "city":"city name",
+    "address_longitude":"Longitude value",
+    "address_latitude":"Latitude value"
+   }
+   ```
+   Response: Approval Message
+
+#### dELETE API Descriptions
+
+1. `deletebranch/id/`
+   Response: Approval Message

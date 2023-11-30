@@ -151,3 +151,42 @@ def deactivateAccount(request, id):
     user.save()
 
     return Response({'Message': 'User account deactivated successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateBranch(request, pk):
+    # Check if the current user is a manager
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Check if the branch with the given primary key exists
+    branch = get_object_or_404(Branch, pk=pk)
+
+    # Check if the new branch name already exists
+    new_branch_name = request.data.get('branchname')
+    if Branch.objects.exclude(pk=pk).filter(branchname=new_branch_name).exists():
+        return Response({'Message': 'Branch name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Update the branch data
+    serializer = BranchSerializer(branch, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'Message': 'Branch updated successfully'}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deleteBranch(request, pk):
+    # Check if the current user is a manager
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Check if the branch with the given primary key exists
+    branch = get_object_or_404(Branch, pk=pk)
+
+    # Delete the branch
+    branch.delete()
+
+    return Response({'Message': 'Branch deleted successfully'}, status=status.HTTP_200_OK)
