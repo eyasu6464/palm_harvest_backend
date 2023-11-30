@@ -47,7 +47,9 @@ def registerBranch(request):
     serializer = BranchSerializer(data=data)
     if(serializer.is_valid()):
         serializer.save()
-        return Response(serializer.data, status=201)
+        return Response({
+                'Message':'Branch Registered'
+                }, status=201)
     return Response(serializer.errors, status=400)
 
 
@@ -90,7 +92,7 @@ def getbranch(request,pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allUsers(request):
-    user = PalmUser.objects.filter(palmuser__is_active = True)    
+    user = PalmUser.objects.filter(user_type = "Harvester")    
     serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
 
@@ -124,7 +126,7 @@ def inactiveUsers(request):
     
     return Response(user_data, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def activateAccount(request, id):
     try:
@@ -137,7 +139,7 @@ def activateAccount(request, id):
 
     return Response({'Message': 'User account activated successfully'}, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def deactivateAccount(request, id):
     try:

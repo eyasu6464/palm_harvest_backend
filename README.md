@@ -14,6 +14,8 @@ Techstack: Django
 | GET | `api/branches` | get all branches |
 | GET | `api/userinformation` | get current user information |
 | GET | `api/getbranch/id` | get specific branch by id |
+| GET | `api/activateaccount/id/` | activate user account by id |
+| GET | `api/deactivateaccount/id/` | deactivate user account by id |
 
 ##### All API need Bearer Token except register 
 
@@ -77,7 +79,8 @@ Techstack: Django
             "username": "username",
             "email": "email",
             "first_name": "First Name",
-            "last_name": "Last Name"
+            "last_name": "Last Name",
+            "is_active": "Boolean"
         },
         "branch":  branch ID,
         "user_type": "USER_TYPE",
@@ -128,3 +131,7 @@ Techstack: Django
         "address_latitude": "Latitude Address"
     }
    ```
+6. `api/activateaccount/id/`
+   Response: Messsage
+7. `api/activateaccount/id/`
+   Response: Messsage
