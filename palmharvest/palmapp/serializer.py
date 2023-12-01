@@ -27,3 +27,8 @@ class PalmDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = PalmDetail
         fields= '__all__'
+
+class PasswordResetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PasswordReset
+        fields = '__all__'

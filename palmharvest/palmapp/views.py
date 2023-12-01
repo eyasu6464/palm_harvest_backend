@@ -9,6 +9,22 @@ from datetime import datetime
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.utils import timezone
+from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.tokens import default_token_generator
+from django.template.loader import render_to_string
+from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes
+from django.contrib.sessions.models import Session
+from django.conf import settings
+
+
+
+
+
+
 
 # Create your views here.
 
@@ -44,13 +60,19 @@ def register(request):
 @permission_classes([IsAuthenticated])
 def registerBranch(request):
     data = request.data
+    branch_name = data.get('branchname')
+
+    # Check if the branch name already exists
+    if Branch.objects.filter(branchname=branch_name).exists():
+        return Response({'Message': 'Branch name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # If the branch name doesn't exist, proceed with branch registration
     serializer = BranchSerializer(data=data)
-    if(serializer.is_valid()):
+    if serializer.is_valid():
         serializer.save()
-        return Response({
-                'Message':'Branch Registered'
-                }, status=201)
-    return Response(serializer.errors, status=400)
+        return Response({'Message': 'Branch Registered'}, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -250,3 +272,61 @@ def changePassword(request):
 
     # Return a response
     return Response({'Message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def forgetPassword(request):
+    email = request.data.get('email')
+    user = User.objects.filter(email=email).first()
+
+    if user:
+        # Generate a password reset token
+        token = default_token_generator.make_token(user)
+
+        # Create a PasswordReset entry
+        reset_data = {'user': user.id, 'token': token}
+        serializer = PasswordResetSerializer(data=reset_data)
+        if serializer.is_valid():
+            serializer.save()
+
+            # Send email with reset link
+            current_site = get_current_site(request)
+            domain = current_site.domain
+            uid = urlsafe_base64_encode(force_bytes(user.id))
+            reset_url = f'http://{domain}/reset-password/{uid}/{token}/'
+
+            subject = 'Reset Your Password'
+            message = str({'reset_url': reset_url})
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+
+            return Response({'Message': 'Password reset link sent to your email.'}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'Message': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def resetPassword(request, uidb64, token):
+    try:
+        # Decode the UID and get the user
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = get_user_model().objects.get(pk=uid)
+
+        # Check if the provided token is valid
+        if default_token_generator.check_token(user, token):
+            # Update the user's password
+            new_password = request.data.get('new_password')
+            user.set_password(new_password)
+            user.save()
+
+            # Invalidate existing sessions
+            Session.objects.filter(expire_date__gte=timezone.now(), session_data__contains=str(user.id)).delete()
+
+            # Optionally, you may want to invalidate the token to ensure it can't be reused
+            # password_reset_token = PasswordReset.objects.get(user=user)
+            # password_reset_token.delete()
+            return Response({'Message': 'Password reset successfully'}, status=status.HTTP_200_OK)        
+        else:
+            return Response({'Message': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({'Message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)

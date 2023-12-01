@@ -40,3 +40,8 @@ class PalmDetail(models.Model):
     x2_coordinate = models.CharField(max_length=50)
     y2_coordinate = models.CharField(max_length=50)
     palm_image_uploaded = models.DateTimeField()
+
+class PasswordReset(models.Model):
+    user = models.ForeignKey(AuthUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
