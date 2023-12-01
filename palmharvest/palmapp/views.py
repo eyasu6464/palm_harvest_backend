@@ -219,3 +219,34 @@ def updateProfile(request):
 
     # Return a response
     return Response({'Message': 'User profile updated successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def changePassword(request):
+    # Get the authenticated user
+    auth_user = request.user
+
+    # Check if the user is active
+    if not auth_user.is_active:
+        return Response({'Message': 'Account is deactivated. Cannot change password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get the old and new passwords from the request data
+    old_password = request.data.get('old_password')
+    new_password = request.data.get('new_password')
+
+    # Validate if both old and new passwords are provided
+    if not old_password or not new_password:
+        return Response({'Message': 'Both old and new passwords are required for the change.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Check if the old password matches the current password
+    if not auth_user.check_password(old_password):
+        return Response({'Message': 'Old password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Set the new hashed password for the user
+    auth_user.set_password(new_password)
+    
+    # Save the changes
+    auth_user.save()
+
+    # Return a response
+    return Response({'Message': 'Password changed successfully'}, status=status.HTTP_200_OK)
