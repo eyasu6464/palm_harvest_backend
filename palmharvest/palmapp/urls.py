@@ -15,5 +15,6 @@ urlpatterns = [
     path('activateaccount/<int:id>/', views.activateAccount, name='activate-account'),
     path('deactivateaccount/<int:id>/', views.deactivateAccount, name='deactivate-account'),
     path('updatebranch/<int:pk>/', views.updateBranch, name='update_branch_info'),
-    path('deletebranch/<int:pk>/', views.deleteBranch, name='delete_branch_by_id')
+    path('deletebranch/<int:pk>/', views.deleteBranch, name='delete_branch_by_id'),
+    path('updateprofile/', views.updateProfile, name="Update_Profile")
 ]

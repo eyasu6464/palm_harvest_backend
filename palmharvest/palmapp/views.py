@@ -190,3 +190,32 @@ def deleteBranch(request, pk):
     branch.delete()
 
     return Response({'Message': 'Branch deleted successfully'}, status=status.HTTP_200_OK)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def updateProfile(request):
+    # Get the authenticated user
+    auth_user = request.user
+
+    # Check if the user is active
+    if not auth_user.is_active:
+        return Response({'Message': 'Account is deactivated'}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Get the PalmUser associated with the authenticated user
+    palm_user = get_object_or_404(PalmUser, palmuser=auth_user)
+
+    # Update the user's profile
+    auth_user.first_name = request.data.get('first_name', auth_user.first_name)
+    auth_user.last_name = request.data.get('last_name', auth_user.last_name)
+    auth_user.email = request.data.get('email', auth_user.email)
+
+    # Update the PalmUser fields
+    palm_user.user_type = request.data.get('user_type', palm_user.user_type)
+    palm_user.address = request.data.get('address', palm_user.address)
+    palm_user.branch_id = request.data.get('branch_id', palm_user.branch_id)
+
+    # Save the changes
+    auth_user.save()
+    palm_user.save()
+
+    # Return a response
+    return Response({'Message': 'User profile updated successfully'}, status=status.HTTP_200_OK)
