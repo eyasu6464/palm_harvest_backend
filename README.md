@@ -17,7 +17,10 @@ Techstack: Django
 | GET | `api/activateaccount/id/` | activate user account by id |
 | GET | `api/deactivateaccount/id/` | deactivate user account by id |
 | PUT | `updatebranch/id/` | update branch informaiton |
-| DELETE | `deletebranch/id/` | delete branch |
+| PUT | `updateprofile/` | update user profile |
+| PUT | `changepassword/` | change user password |
+| POST | `forgetpassword/` | user forget password to get an email |
+| POST | `resetpassword/uid/token/` | reset password via email link |
 
 ##### All API need Bearer Token except register 
 
@@ -67,6 +70,21 @@ Techstack: Django
 5. `api/uploadimage`
    ```JSON
    form data with key name image
+   ```
+   Response: Approval Message
+
+6. `forgetpassword/`
+   ```JSON
+   {
+    "email":"User Email"
+   }
+   ```
+   Response: Approval Message
+7. `resetpassword/uid/token/`
+   ```JSON
+   {
+    "new_password":"User New Password"
+   }
    ```
    Response: Approval Message
 
@@ -151,6 +169,27 @@ Techstack: Django
    }
    ```
    Response: Approval Message
+2. `updateprofile/`
+   ```JSON
+   {
+    "first_name":"first name",
+    "last_name":"last name",
+    "email":"User email",
+    "user_type":"User type",
+    "address":"address",
+    "branch_id":"branch id"
+   }
+   ```
+   Response: Approval Message
+3. `changepassword/`
+   ```JSON
+   {
+    "old_password":"User Old Password",
+    "new_password":"User New Password"
+   }
+   ```
+   Response: Approval Message
+   
 
 #### dELETE API Descriptions
 
