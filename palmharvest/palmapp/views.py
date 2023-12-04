@@ -292,7 +292,7 @@ def forgetPassword(request):
             current_site = get_current_site(request)
             domain = current_site.domain
             uid = urlsafe_base64_encode(force_bytes(user.id))
-            reset_url = f'http://{domain}/reset-password/{uid}/{token}/'
+            reset_url = f'http://localhost:5173/resetpassword/{uid}/{token}/'
 
             subject = 'Reset Your Password'
             message = str({'reset_url': reset_url})
@@ -329,4 +329,4 @@ def resetPassword(request, uidb64, token):
             return Response({'Message': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
-        return Response({'Message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'Message': 'InvalidLink'}, status=status.HTTP_404_NOT_FOUND)
