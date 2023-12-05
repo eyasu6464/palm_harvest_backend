@@ -118,12 +118,59 @@ def allUsers(request):
     serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
 
+from datetime import datetime
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allimages(request):
-    image = Image.objects.all()    
-    serializer = ImageSerializer(image, many=True)
-    return Response(serializer.data)
+    # Check if the authenticated user is a manager
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    images = Image.objects.all()
+    serializer = ImageSerializer(images, many=True)
+
+    # Enhance the serialized data by including image, harvester, and branch details
+    serialized_data = []
+    for image_data in serializer.data:
+        # Fetch and serialize harvester information
+        harvester_id = image_data['harvesterid']
+        harvester = PalmUser.objects.get(pk=harvester_id)
+        harvester_serializer = PalmUserSerializer(harvester)
+        harvester_data = harvester_serializer.data
+
+        # Fetch and serialize branch information
+        branch_id = harvester.branch_id
+        branch = Branch.objects.get(pk=branch_id)
+        branch_serializer = BranchSerializer(branch)
+        branch_data = branch_serializer.data
+
+        # Parse string dates into datetime objects
+        image_created = datetime.strptime(image_data['image_created'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        image_uploaded = datetime.strptime(image_data['image_uploaded'], '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # Format the date fields
+        image_created_formatted = image_created.strftime('%Y-%m-%d')
+        image_uploaded_formatted = image_uploaded.strftime('%Y-%m-%d')
+
+        # Create the final response data format
+        response_data = {
+            'imageid': image_data['imageid'],
+            'imagepath': image_data['imagepath'],
+            'image_created': image_created_formatted,
+            'image_uploaded': image_uploaded_formatted,
+            'harvester_id': harvester_data['palmuser']['id'],
+            'harvester_fullname': f"{harvester_data['palmuser']['first_name']} {harvester_data['palmuser']['last_name']}",
+            'branch_id': branch_data['branchid'],
+            'branch_name': branch_data['branchname'],
+            'branch_city': branch_data['city'],
+        }
+
+        serialized_data.append(response_data)
+
+    return Response(serialized_data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 def allBranchNames(request):
