@@ -377,3 +377,58 @@ def resetPassword(request, uidb64, token):
 
     except Exception as e:
         return Response({'Message': 'InvalidLink'}, status=status.HTTP_404_NOT_FOUND)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getImageDetails(request, pk):
+    # Check if the authenticated user is a manager
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Get the image based on the provided ID
+    image = get_object_or_404(Image, imageid=pk)
+
+    # Serialize the image details
+    image_serializer = ImageSerializer(image)
+
+    # Get and serialize harvester information
+    harvester_id = image_serializer.data['harvesterid']
+    harvester = get_object_or_404(PalmUser, pk=harvester_id)
+    harvester_serializer = PalmUserSerializer(harvester)
+    harvester_data = harvester_serializer.data
+
+    # Get and serialize branch information
+    branch_id = harvester.branch_id
+    branch = get_object_or_404(Branch, pk=branch_id)
+    branch_serializer = BranchSerializer(branch)
+    branch_data = branch_serializer.data
+
+    # Parse string dates into datetime objects
+    image_created = datetime.strptime(image_serializer.data['image_created'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    image_uploaded = datetime.strptime(image_serializer.data['image_uploaded'], '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    # Format the date fields
+    image_created_formatted = image_created.strftime('%Y-%m-%d')
+    image_uploaded_formatted = image_uploaded.strftime('%Y-%m-%d')
+
+    # Get and serialize PalmDetail items associated with the image
+    palmdetails = PalmDetail.objects.filter(imageid=image)
+    palmdetail_serializer = PalmDetailSerializer(palmdetails, many=True)
+
+    # Create the final response data format
+    response_data = {
+        'imageid': image_serializer.data['imageid'],
+        'imagepath': image_serializer.data['imagepath'],
+        'image_created': image_created_formatted,
+        'image_uploaded': image_uploaded_formatted,
+        'harvester_id': harvester_data['palmuser']['id'],
+        'harvester_fullname': f"{harvester_data['palmuser']['first_name']} {harvester_data['palmuser']['last_name']}",
+        'branch_id': branch_data['branchid'],
+        'branch_name': branch_data['branchname'],
+        'branch_city': branch_data['city'],
+        'palmdetails': palmdetail_serializer.data,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)

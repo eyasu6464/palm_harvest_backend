@@ -14,6 +14,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
 class PalmUserSerializer(serializers.ModelSerializer):
     palmuser = AuthUserSerializer()
+    branch = BranchSerializer()
     class Meta:
         model = PalmUser
         fields = ('palmuser', 'branch', 'user_type', 'address')

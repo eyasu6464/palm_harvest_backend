@@ -20,5 +20,6 @@ urlpatterns = [
     path('changepassword/', views.changePassword, name="change _user_password"),
     path('forgetpassword/', views.forgetPassword, name='reset_user_password'),
     path('reset-password/<str:uidb64>/<str:token>/', views.resetPassword, name='reset_password'),
+    path('image/<int:pk>/', views.getImageDetails, name='image-details'),
 
 ]
