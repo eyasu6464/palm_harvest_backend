@@ -432,3 +432,23 @@ def getImageDetails(request, pk):
     }
 
     return Response(response_data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def sendEmail(request):
+    try:
+        subject = request.data.get('subject')
+        message = request.data.get('message')
+        to_email = request.data.get('to_email') 
+        
+        # Ensure required fields are provided
+        if not subject or not message or not to_email:
+            return Response({'Message': 'Subject, message, and recipient email are required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Send the email
+        send_mail(subject, message, settings.EMAIL_HOST_USER, [to_email], fail_silently=False)
+
+        return Response({'Message': 'Email sent successfully.'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error sending email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

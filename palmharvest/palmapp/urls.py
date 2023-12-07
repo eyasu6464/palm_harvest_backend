@@ -21,5 +21,6 @@ urlpatterns = [
     path('forgetpassword/', views.forgetPassword, name='reset_user_password'),
     path('reset-password/<str:uidb64>/<str:token>/', views.resetPassword, name='reset_password'),
     path('image/<int:pk>/', views.getImageDetails, name='image-details'),
+    path('sendemail/', views.sendEmail, name='send-email'),
 
 ]
