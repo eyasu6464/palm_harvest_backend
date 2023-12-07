@@ -452,3 +452,18 @@ def sendEmail(request):
 
     except Exception as e:
         return Response({'Message': f'Error sending email: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def palmDetailed(request):
+    try:
+        # Add any additional validation based on your requirements
+        serializer = PalmDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'Message': 'Palm details entered successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({'Message': f'Error entering palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
