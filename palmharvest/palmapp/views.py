@@ -19,10 +19,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.contrib.sessions.models import Session
 from django.conf import settings
-
-
-
-
+from datetime import datetime
 
 
 
@@ -118,8 +115,6 @@ def allUsers(request):
     serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
 
-from datetime import datetime
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allimages(request):
@@ -154,6 +149,10 @@ def allimages(request):
         image_created_formatted = image_created.strftime('%Y-%m-%d')
         image_uploaded_formatted = image_uploaded.strftime('%Y-%m-%d')
 
+        # Get PalmDetails associated with the image
+        palmdetails = PalmDetail.objects.filter(imageid=image_data['imageid'])
+        palmdetail_serializer = PalmDetailSerializer(palmdetails, many=True)
+
         # Create the final response data format
         response_data = {
             'imageid': image_data['imageid'],
@@ -165,6 +164,7 @@ def allimages(request):
             'branch_id': branch_data['branchid'],
             'branch_name': branch_data['branchname'],
             'branch_city': branch_data['city'],
+            'palmdetails': palmdetail_serializer.data,
         }
 
         serialized_data.append(response_data)

@@ -33,7 +33,7 @@ class PalmDetail(models.Model):
     palmid = models.AutoField(primary_key=True)
     quality = models.CharField(max_length=50)
     imageid = models.ForeignKey(Image, on_delete=models.CASCADE)
-    real = models.CharField(max_length=50)
+    real = models.BooleanField()
     predicted = models.BooleanField()
     x1_coordinate = models.CharField(max_length=50)
     y1_coordinate = models.CharField(max_length=50)

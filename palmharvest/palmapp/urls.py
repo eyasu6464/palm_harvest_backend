@@ -4,8 +4,8 @@ from .import views
 urlpatterns = [
     path('registeruser/', views.register, name="register_new_user"),
     path('branches/', views.allBranches, name="get_all_branches"),
-    path('users/', views.allUsers, name="get_all_branches"),
-    path('images/', views.allimages, name="get_all_branches"),
+    path('users/', views.allUsers, name="get_all_users"),
+    path('images/', views.allimages, name="get_all_images"),
     path('registerbranch/', views.registerBranch, name='register_branch'),
     path('uploadimage/', views.uploadImage, name="Upload_image"),
     path('userinformation/', views.userInfo, name="user_information"),
