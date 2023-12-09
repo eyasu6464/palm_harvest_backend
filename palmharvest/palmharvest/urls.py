@@ -17,10 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
+from . import views
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',TemplateView.as_view(template_name='index.html')),
     path('api/', include('palmapp.urls')),
     path('api/token/',TokenObtainPairView.as_view()),
     path('api/token/verify/', TokenVerifyView.as_view()),
