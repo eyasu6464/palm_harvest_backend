@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 from . import views
 from django.views.generic import TemplateView
@@ -26,5 +26,4 @@ urlpatterns = [
     path('api/', include('palmapp.urls')),
     path('api/token/',TokenObtainPairView.as_view()),
     path('api/token/verify/', TokenVerifyView.as_view()),
-    re_path(r'^.*', TemplateView.as_view(template_name='index.html')),
 ]
