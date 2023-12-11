@@ -450,17 +450,26 @@ def getImageDetails(request, pk):
 
     return Response(response_data, status=status.HTTP_200_OK)
 
+from django.contrib.auth.models import User
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def sendEmail(request):
     try:
         subject = request.data.get('subject')
         message = request.data.get('message')
-        to_email = request.data.get('to_email') 
-        
+        user_id = request.data.get('userid')
+
         # Ensure required fields are provided
-        if not subject or not message or not to_email:
-            return Response({'Message': 'Subject, message, and recipient email are required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not subject or not message or not user_id:
+            return Response({'Message': 'Subject, message, and user ID are required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get user email by ID
+        try:
+            user = User.objects.get(id=user_id)
+            to_email = user.email
+        except User.DoesNotExist:
+            return Response({'Message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Send the email
         send_mail(subject, message, settings.EMAIL_HOST_USER, [to_email], fail_silently=False)
