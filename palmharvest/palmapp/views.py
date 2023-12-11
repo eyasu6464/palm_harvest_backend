@@ -97,6 +97,9 @@ def userInfo(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allBranches(request):
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     branch = Branch.objects.all()    
     serializer = BranchSerializer(branch, many=True)
     return Response(serializer.data)
@@ -104,6 +107,9 @@ def allBranches(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getbranch(request,pk):
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     branch = get_object_or_404(Branch, branchid=pk)
     serializer = BranchSerializer(branch, many=False)
     return Response(serializer.data)
@@ -111,6 +117,9 @@ def getbranch(request,pk):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allUsers(request):
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     user = PalmUser.objects.filter(user_type = "Harvester")    
     serializer = PalmUserSerializer(user, many=True)
     return Response(serializer.data)
@@ -182,7 +191,9 @@ def allBranchNames(request):
 @permission_classes([IsAuthenticated])
 def inactiveUsers(request):
     inactive_users = AuthUser.objects.filter(is_active=False)
-    
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     user_data = []
     for user in inactive_users:
         user_info = {
@@ -198,6 +209,9 @@ def inactiveUsers(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def activateAccount(request, id):
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         user = AuthUser.objects.get(id=id)
     except AuthUser.DoesNotExist:
@@ -211,6 +225,9 @@ def activateAccount(request, id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def deactivateAccount(request, id):
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         user = AuthUser.objects.get(id=id)
     except AuthUser.DoesNotExist:
