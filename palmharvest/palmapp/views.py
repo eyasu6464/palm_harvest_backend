@@ -356,7 +356,7 @@ def forgetPassword(request):
             current_site = get_current_site(request)
             domain = current_site.domain
             uid = urlsafe_base64_encode(force_bytes(user.id))
-            reset_url = f'http://localhost:5173/resetpassword/{uid}/{token}/'
+            reset_url = f'http://palmfrontend.blackneb.com/#/resetpassword/{uid}/{token}/'
 
             subject = 'Reset Your Password'
             message = str({'reset_url': reset_url})
