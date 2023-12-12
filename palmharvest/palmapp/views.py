@@ -20,6 +20,8 @@ from django.utils.encoding import force_bytes
 from django.contrib.sessions.models import Session
 from django.conf import settings
 from datetime import datetime
+from django.utils import timezone
+
 
 
 
@@ -81,8 +83,8 @@ def uploadImage(request):
     image_instance = Image.objects.create(
         harvesterid = request.user,
         imagepath=image_obj,
-        image_created = datetime.now(),
-        image_uploaded = datetime.now())
+        image_created = timezone.now(),
+        image_uploaded = timezone.now())
     image_instance.save()
     serializer = ImageSerializer(image_instance)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
