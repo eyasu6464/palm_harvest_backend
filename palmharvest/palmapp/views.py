@@ -594,3 +594,25 @@ def createPalmDetail(request):
 
     except Exception as e:
         return Response({'Message': f'Error creating PalmDetail: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deletePalmDetail(request, pk):
+    try:
+        # Check if the authenticated user is a manager or has appropriate permissions
+        # Adjust the permission check based on your requirements
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get the PalmDetail object based on the provided ID
+        palm_detail = get_object_or_404(PalmDetail, palmid=pk)
+
+        # Delete the PalmDetail
+        palm_detail.delete()
+
+        return Response({'Message': 'PalmDetail deleted successfully.'}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error deleting PalmDetail: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
