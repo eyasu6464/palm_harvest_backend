@@ -21,6 +21,9 @@ from django.contrib.sessions.models import Session
 from django.conf import settings
 from datetime import datetime
 from django.utils import timezone
+from PIL import Image as PILImage
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 
@@ -78,14 +81,41 @@ def registerBranch(request):
 @permission_classes([IsAuthenticated])
 def uploadImage(request):
     image_obj = request.data.get("image")
+    
     if not image_obj:
-        return Response({"error":"Image is Required"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Image is Required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Open the image using Pillow
+    original_image = PILImage.open(image_obj)
+
+    # Resize the image to 1280x1280 pixels
+    resized_image = original_image.resize((1280, 1280))
+
+    # Save the resized image to a BytesIO buffer
+    image_buffer = BytesIO()
+    resized_image.save(image_buffer, format='JPEG')
+
+    # Create an InMemoryUploadedFile from the buffer
+    uploaded_image = InMemoryUploadedFile(
+        image_buffer,
+        None,
+        'image.jpg', 
+        'image/jpeg',
+        image_buffer.tell(),
+        None
+    )
+
+    # Create and save the Image model instance
     image_instance = Image.objects.create(
-        harvesterid = request.user,
-        imagepath=image_obj,
-        image_created = timezone.now(),
-        image_uploaded = timezone.now())
+        harvesterid=request.user,
+        imagepath=uploaded_image,
+        image_created=timezone.now(),
+        image_uploaded=timezone.now()
+    )
+
+    # Save the image instance
     image_instance.save()
+
     serializer = ImageSerializer(image_instance)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
