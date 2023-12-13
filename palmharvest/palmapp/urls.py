@@ -24,5 +24,6 @@ urlpatterns = [
     path('sendemail/', views.sendEmail, name='send-email'),
     path('palmdetailed/', views.palmDetailed, name='palm-detailed'),
     path('deleteimage/<int:pk>/', views.deleteImage, name='delete_image'),
+    path('createpalmdetail/', views.createPalmDetail, name='create_palm_detail')
 
 ]

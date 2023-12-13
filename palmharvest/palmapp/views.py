@@ -26,6 +26,10 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import Http404
 from django.db import transaction
+from rest_framework.parsers import JSONParser
+from rest_framework.decorators import parser_classes
+
+
 
 
 
@@ -553,3 +557,40 @@ def deleteImage(request, pk):
 
     except Http404:
         return Response({'Message': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def createPalmDetail(request):
+    try:
+        # Extract data from the request
+        data = request.data
+
+        # Ensure the required fields are provided
+        required_fields = ['quality', 'imageid', 'real', 'predicted', 'x1_coordinate', 'y1_coordinate', 'x2_coordinate', 'y2_coordinate']
+        for field in required_fields:
+            if field not in data:
+                return Response({'Message': f'{field} is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the Image object based on the provided imageid
+        image_id = data['imageid']
+        image = get_object_or_404(Image, imageid=image_id)
+
+        # Create the PalmDetail instance
+        palm_detail = PalmDetail.objects.create(
+            quality=data['quality'],
+            imageid=image,
+            real=data['real'],
+            predicted=data['predicted'],
+            x1_coordinate=data['x1_coordinate'],
+            y1_coordinate=data['y1_coordinate'],
+            x2_coordinate=data['x2_coordinate'],
+            y2_coordinate=data['y2_coordinate'],
+            palm_image_uploaded=timezone.now()
+        )
+
+        # Serialize and return the created PalmDetail instance
+        serializer = PalmDetailSerializer(palm_detail)
+        return Response({'Message': 'Coordinate created successfully.'}, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({'Message': f'Error creating PalmDetail: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
