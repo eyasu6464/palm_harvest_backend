@@ -24,6 +24,10 @@ from django.utils import timezone
 from PIL import Image as PILImage
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.http import Http404
+from django.db import transaction
+
+
 
 
 
@@ -525,3 +529,27 @@ def palmDetailed(request):
 
     except Exception as e:
         return Response({'Message': f'Error entering palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deleteImage(request, pk):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        with transaction.atomic():
+            # Get the image based on the provided ID
+            image = get_object_or_404(Image, imageid=pk)
+
+            # Delete all PalmDetail rows associated with the image
+            PalmDetail.objects.filter(imageid=image).delete()
+
+            # Delete the image
+            image.delete()
+
+        return Response({'Message': 'Image and associated PalmDetails deleted successfully'}, status=status.HTTP_200_OK)
+
+    except Http404:
+        return Response({'Message': 'Image not found'}, status=status.HTTP_404_NOT_FOUND)

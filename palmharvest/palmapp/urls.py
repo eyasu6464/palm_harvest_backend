@@ -23,5 +23,6 @@ urlpatterns = [
     path('image/<int:pk>/', views.getImageDetails, name='image-details'),
     path('sendemail/', views.sendEmail, name='send-email'),
     path('palmdetailed/', views.palmDetailed, name='palm-detailed'),
+    path('deleteimage/<int:pk>/', views.deleteImage, name='delete_image'),
 
 ]
