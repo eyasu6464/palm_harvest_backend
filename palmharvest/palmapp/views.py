@@ -28,6 +28,10 @@ from django.http import Http404
 from django.db import transaction
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
+from django.contrib.auth import logout
+from rest_framework.authtoken.models import Token
+
+
 
 
 
@@ -616,3 +620,22 @@ def deletePalmDetail(request, pk):
 
     except Exception as e:
         return Response({'Message': f'Error deleting PalmDetail: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    user = request.user
+
+    try:
+        # Attempt to get the user's token
+        token = Token.objects.get(user=user)
+        token.delete()
+        return Response({'message': 'Logout and account termination successful'}, status=status.HTTP_200_OK)
+
+    except Token.DoesNotExist:
+        # Handle the case where no token exists for the user
+        return Response({'message': 'User is not Exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        # Handle any other exceptions and return an error message
+        return Response({'message': f'Failed to logout and terminate account: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
