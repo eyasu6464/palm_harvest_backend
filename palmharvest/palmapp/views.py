@@ -639,3 +639,24 @@ def logout(request):
     except Exception as e:
         # Handle any other exceptions and return an error message
         return Response({'message': f'Failed to logout and terminate account: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getPalmDetails(request, image_id):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get the image based on the provided ID
+        image = get_object_or_404(Image, imageid=image_id)
+
+        # Get and serialize PalmDetail items associated with the image
+        palmdetails = PalmDetail.objects.filter(imageid=image)
+        palmdetail_serializer = PalmDetailSerializer(palmdetails, many=True)
+
+        return Response(palmdetail_serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error getting palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
