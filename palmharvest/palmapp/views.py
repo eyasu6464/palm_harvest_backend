@@ -30,6 +30,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import parser_classes
 from django.contrib.auth import logout
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+
 
 
 
@@ -41,6 +46,34 @@ from rest_framework.authtoken.models import Token
 
 
 # Create your views here.
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        credentials = {
+            self.username_field: attrs.get(self.username_field),
+            'password': attrs.get('password'),
+        }
+
+        if all(credentials.values()):
+            user = AuthUser.objects.filter(username=credentials[self.username_field]).first()
+
+            if user and self.check_user_credentials(user, credentials['password']):
+                if not user.is_active:
+                    raise serializers.ValidationError({'Message': 'Your Account will be activated soon.'}, code='inactive_account')
+            else:
+                raise serializers.ValidationError({'Message': 'Invalid credentials.'}, code='invalid_credentials')
+        else:
+            raise serializers.ValidationError({'Message': 'Must include "username" and "password".'}, code='missing_credentials')
+
+        data = super().validate(attrs)
+        return data
+
+    def check_user_credentials(self, user, password):
+        # Customize this method to check the password using your authentication logic
+        return user.check_password(password)
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
 
 @api_view(['POST'])
 def register(request):
