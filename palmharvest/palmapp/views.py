@@ -787,3 +787,74 @@ def getPalmDetailsSummary(request):
 
     except Exception as e:
         return Response({'Message': f'Error getting palm details summary: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getPalmsSummaryByBranch(request):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get all unique branches
+        branches = Branch.objects.all()
+
+        # Initialize empty lists for labels and data
+        labels = []
+        data = []
+
+        # Iterate through each branch and gather information
+        for branch in branches:
+            # Get the image ids associated with harvester names in the current branch
+            harvester_ids = PalmUser.objects.filter(branch=branch).values_list('palmuser__id', flat=True)
+            image_ids = Image.objects.filter(harvesterid__in=harvester_ids).values_list('imageid', flat=True)
+
+            # Count the number of palm details associated with the image ids
+            palms_count = PalmDetail.objects.filter(imageid__in=image_ids).count()
+
+            # Add branch name to labels and palms count to data
+            labels.append(branch.branchname)
+            data.append(palms_count)
+
+        # Create the response dictionary
+        response_data = {'labels': labels, 'data': data}
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error getting palms summary by branch: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getHarvestersCountByBranch(request):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get all unique branches
+        branches = Branch.objects.all()
+
+        # Initialize empty lists for labels and data
+        labels = []
+        data = []
+
+        # Iterate through each branch and gather information
+        for branch in branches:
+            # Count the number of harvesters in the current branch
+            harvesters_count = PalmUser.objects.filter(branch=branch, user_type='Harvester').count()
+
+            # Add branch name to labels and harvesters count to data
+            labels.append(branch.branchname)
+            data.append(harvesters_count)
+
+        # Create the response dictionary
+        response_data = {'labels': labels, 'data': data}
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error getting harvesters count by branch: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
