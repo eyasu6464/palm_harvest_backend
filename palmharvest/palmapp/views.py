@@ -693,3 +693,71 @@ def getPalmDetails(request, image_id):
 
     except Exception as e:
         return Response({'Message': f'Error getting palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getImageWithPalmDetails(request):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get all images
+        images = Image.objects.all()
+
+        # Initialize an empty list to store the response data for each image
+        response_data_list = []
+
+        # Iterate through each image and gather information
+        for image in images:
+            # Get and serialize PalmDetail items associated with the image
+            palmdetails = PalmDetail.objects.filter(imageid=image)
+            palmdetail_serializer = PalmDetailSerializer(palmdetails, many=True)
+
+            # Count the number of fruits
+            number_of_fruits = len(palmdetails)
+
+            # Count the number of palm details with different conditions
+            unripe_count = palmdetails.filter(quality='unripe').count()
+            ripe_count = palmdetails.filter(quality='ripe').count()
+            overripe_count = palmdetails.filter(quality='overripe').count()
+            real_count = palmdetails.filter(real=True).count()
+            predicted_count = palmdetails.filter(predicted=True).count()
+
+            # Get harvester information
+            harvester = image.harvesterid
+            harvester_serializer = PalmUserSerializer(harvester)
+
+            # Get branch information from the PalmUser model
+            palm_user = PalmUser.objects.get(palmuser=harvester)
+            branch = palm_user.branch
+            branch_serializer = BranchSerializer(branch)
+
+            # Format the date fields in "YYYY-MM-DD" format
+            image_created = image.image_created.strftime('%Y-%m-%d')
+            image_uploaded = image.image_uploaded.strftime('%Y-%m-%d')
+
+            # Create the dictionary for the current image
+            image_data = {
+                'imageId': image.imageid,
+                'imageCreated': image_created,
+                'imageUploaded': image_uploaded,
+                'harvesterName': f"{harvester.first_name} {harvester.last_name}",
+                'branchName': branch.branchname,
+                'numberOfFruits': number_of_fruits,
+                'unRipe': unripe_count,
+                'ripe': ripe_count,
+                'overRipe': overripe_count,
+                'real': real_count,
+                'predicted': predicted_count,
+            }
+
+            # Append the image data to the list
+            response_data_list.append(image_data)
+
+        return Response(response_data_list, status=status.HTTP_200_OK)
+
+
+    except Exception as e:
+        return Response({'Message': f'Error getting image with palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

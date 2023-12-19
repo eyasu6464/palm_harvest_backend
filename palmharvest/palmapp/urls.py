@@ -27,6 +27,7 @@ urlpatterns = [
     path('createpalmdetail/', views.createPalmDetail, name='create_palm_detail'),
     path('deletepalmdetail/<int:pk>/', views.deletePalmDetail, name='delete_palm_detail'),
     path('getPalmDetails/<int:image_id>/', views.getPalmDetails, name='get_palm_details'),
+    path('getpalmlist/',views.getImageWithPalmDetails, name='get_image_with_palm_details'),
     path('logout/',views.logout, name="logout")
 
 ]
