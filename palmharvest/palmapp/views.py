@@ -32,6 +32,8 @@ from django.contrib.auth import logout
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.db.models import Count
+
 
 
 
@@ -761,3 +763,27 @@ def getImageWithPalmDetails(request):
 
     except Exception as e:
         return Response({'Message': f'Error getting image with palm details: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getPalmDetailsSummary(request):
+    try:
+        # Check if the authenticated user is a manager
+        user_type = request.user.palmuser.user_type
+        if user_type != 'Manager':
+            return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Get all unique qualities and their counts from PalmDetail table
+        palm_details_summary = PalmDetail.objects.values('quality').annotate(count=Count('quality'))
+
+        # Extract labels and data from the summary
+        labels = [summary['quality'] for summary in palm_details_summary]
+        data = [summary['count'] for summary in palm_details_summary]
+
+        # Create the response dictionary
+        response_data = {'labels': labels, 'data': data}
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'Message': f'Error getting palm details summary: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
