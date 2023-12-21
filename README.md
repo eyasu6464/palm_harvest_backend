@@ -21,6 +21,10 @@ Techstack: Django
 | PUT | `changepassword/` | change user password |
 | POST | `forgetpassword/` | user forget password to get an email |
 | POST | `resetpassword/uid/token/` | reset password via email link |
+| PUT | `image/id` | Get Image Details |
+| PUT | `sendemail/` | Email Send |
+| PUT | `palmdetailed/` | Palm All Information |
+
 
 ##### All API need Bearer Token except register 
 
