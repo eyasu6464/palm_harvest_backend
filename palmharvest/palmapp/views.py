@@ -869,13 +869,14 @@ def harvesterPalmConnectedSummary(request):
 
     # Query to get users who are both managers and harvesters
     harvester_summary = PalmUser.objects.filter(user_type__in=['Manager', 'Harvester']).annotate(
+        harvesterid=F('palmuser_id'),  # Rename the 'palmuser_id' field to 'harvesterid'
         palmuser__first_name=F('palmuser__first_name'),
         palmuser__last_name=F('palmuser__last_name'),
         image_count=Count('palmuser__image'),
         total_fruits_collected=Count('palmuser__image__palmdetail'),
         start_date=Min('palmuser__image__image_uploaded'),
         last_date=Max('palmuser__image__image_uploaded')
-    ).values('palmuser__first_name', 'palmuser__last_name', 'image_count', 'total_fruits_collected', 'start_date', 'last_date')
+    ).values('harvesterid', 'palmuser__first_name', 'palmuser__last_name', 'image_count', 'total_fruits_collected', 'start_date', 'last_date')
 
     # Serialize the data
     serializer = ManagerHarvesterUserSerializer(harvester_summary, many=True)

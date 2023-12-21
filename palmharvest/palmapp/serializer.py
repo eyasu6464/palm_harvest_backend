@@ -35,6 +35,7 @@ class PasswordResetSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ManagerHarvesterUserSerializer(serializers.Serializer):
+    harvesterid = serializers.IntegerField()
     full_name = serializers.SerializerMethodField()
     image_count = serializers.IntegerField()
     total_fruits_collected = serializers.IntegerField()
