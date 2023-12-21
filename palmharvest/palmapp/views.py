@@ -33,6 +33,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.db.models import Count, F, Min, Max
+from django.db.models import Count, DateTimeField
+from django.db.models.functions import TruncMonth, TruncYear
+from calendar import month_name as month_name  # Add this line with the alias
+
+
 
 
 
@@ -882,3 +887,38 @@ def harvesterPalmConnectedSummary(request):
     serializer = ManagerHarvesterUserSerializer(harvester_summary, many=True)
 
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def allYearMonthsWithImageAndDataCount(request):
+    # Get distinct year and month names with the count of images and PalmDetails from the Image and PalmDetail tables
+    year_month_data = Image.objects.annotate(
+        year=TruncYear('image_uploaded', output_field=DateTimeField()),
+        month=TruncMonth('image_uploaded', output_field=DateTimeField())
+    ).values('year', 'month').annotate(
+        image_count=Count('pk'),
+        data_count=Count('palmdetail')
+    ).order_by('year', 'month')
+
+    # Organize data into the desired structure
+    response_data = []
+
+    # Iterate over years
+    for year in range(min([item['year'].year for item in year_month_data]),
+                      max([item['year'].year for item in year_month_data]) + 1):
+        year_data = {'year': year, 'labels': [], 'data': []}
+
+        # Iterate over months
+        for month in range(1, 13):
+            month_name_str = month_name[month]
+
+            # Find the corresponding data for the year and month
+            matching_data = next((item for item in year_month_data if item['year'].year == year and item['month'].month == month), None)
+
+            # Add data to the lists
+            year_data['labels'].append(month_name_str)
+            year_data['data'].append(matching_data['data_count'] if matching_data else 0)
+
+        response_data.append(year_data)
+
+    return Response(response_data)
