@@ -32,7 +32,7 @@ from django.contrib.auth import logout
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.db.models import Count
+from django.db.models import Count, F, Min, Max
 
 
 
@@ -858,3 +858,26 @@ def getHarvestersCountByBranch(request):
 
     except Exception as e:
         return Response({'Message': f'Error getting harvesters count by branch: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def harvesterPalmConnectedSummary(request):
+    # Check if the authenticated user is a manager
+    user_type = request.user.palmuser.user_type
+    if user_type != 'Manager':
+        return Response({'Message': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    # Query to get users who are both managers and harvesters
+    harvester_summary = PalmUser.objects.filter(user_type__in=['Manager', 'Harvester']).annotate(
+        palmuser__first_name=F('palmuser__first_name'),
+        palmuser__last_name=F('palmuser__last_name'),
+        image_count=Count('palmuser__image'),
+        total_fruits_collected=Count('palmuser__image__palmdetail'),
+        start_date=Min('palmuser__image__image_uploaded'),
+        last_date=Max('palmuser__image__image_uploaded')
+    ).values('palmuser__first_name', 'palmuser__last_name', 'image_count', 'total_fruits_collected', 'start_date', 'last_date')
+
+    # Serialize the data
+    serializer = ManagerHarvesterUserSerializer(harvester_summary, many=True)
+
+    return Response(serializer.data, status=status.HTTP_200_OK)

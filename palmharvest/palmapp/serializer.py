@@ -33,3 +33,13 @@ class PasswordResetSerializer(serializers.ModelSerializer):
     class Meta:
         model = PasswordReset
         fields = '__all__'
+
+class ManagerHarvesterUserSerializer(serializers.Serializer):
+    full_name = serializers.SerializerMethodField()
+    image_count = serializers.IntegerField()
+    total_fruits_collected = serializers.IntegerField()
+    start_date = serializers.DateTimeField(format="%Y-%m-%d")
+    last_date = serializers.DateTimeField(format="%Y-%m-%d")
+
+    def get_full_name(self, obj):
+        return f"{obj['palmuser__first_name']} {obj['palmuser__last_name']}"
