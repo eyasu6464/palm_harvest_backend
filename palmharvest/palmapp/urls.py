@@ -33,6 +33,7 @@ urlpatterns = [
     path('getharvesterscountbybranch/', views.getHarvestersCountByBranch, name="get_harvesters_count_by_branch"),
     path('harvesterpalmconnectedsummary/', views.harvesterPalmConnectedSummary, name="manager_harvester_users"),
     path('allyearmonthswithimagecount/', views.allYearMonthsWithImageAndDataCount, name='all-year-months-with-image-count'),
+    path('branchyearmonthswithimageanddatacount/',views.branchYearMonthsWithImageAndDataCount, name='branchYearMonthsWithImageAndDataCount'),
     path('logout/',views.logout, name="logout")
 
 ]

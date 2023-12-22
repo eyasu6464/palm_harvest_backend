@@ -922,3 +922,52 @@ def allYearMonthsWithImageAndDataCount(request):
         response_data.append(year_data)
 
     return Response(response_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def branchYearMonthsWithImageAndDataCount(request):
+    branches = Branch.objects.all()
+    response_data = []
+
+    for branch in branches:
+        branch_year_month_data = Image.objects.filter(
+            harvesterid__palmuser__branch=branch
+        ).annotate(
+            year=TruncYear('image_uploaded', output_field=DateTimeField()),
+            month=TruncMonth('image_uploaded', output_field=DateTimeField())
+        ).values('year', 'month').annotate(
+            image_count=Count('pk'),
+            data_count=Count('palmdetail')
+        ).order_by('year', 'month')
+
+        # Organize data into the desired structure
+        year_data = {'year': None, 'branches': []}
+
+        # Check if branch_year_month_data is not empty
+        if branch_year_month_data:
+            # Iterate over years
+            min_year = min([item['year'].year for item in branch_year_month_data])
+            max_year = max([item['year'].year for item in branch_year_month_data]) + 1
+
+            for year in range(min_year, max_year):
+                year_data['year'] = year
+                branch_data = {'branchName': branch.branchname, 'labels': [], 'data': []}
+
+                # Iterate over months
+                for month in range(1, 13):
+                    month_name_str = month_name[month]
+
+                    # Find the corresponding data for the year, branch, and month
+                    matching_data = next((item for item in branch_year_month_data
+                                          if item['year'].year == year
+                                          and item['month'].month == month), None)
+
+                    # Add data to the lists
+                    branch_data['labels'].append(month_name_str)
+                    branch_data['data'].append(matching_data['data_count'] if matching_data else 0)
+
+                year_data['branches'].append(branch_data)
+
+            response_data.append(year_data)
+
+    return Response(response_data)
